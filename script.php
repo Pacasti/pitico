@@ -84,26 +84,40 @@ try {
         echo Response::with(Status::HTTP_BAD_REQUEST, sprintf($translation->forKey('email_already_exists'), $email));
     } else {
         if ($database->save($input)) {
-            // Email setup
-            $adminEmail = 'admin@yourdomain.com';
-            $subject = 'New form submission received';
-            $message = "A new visitor has submitted the form.\n\n";
-            foreach ($input as $key => $value) {
-                $message .= ucfirst($key) . ': ' . $value . "\n";
-            }
+            //-- Send email notification
+            $mail = new PHPMailer(true);
+            try {
+                //Server settings
+                $mail->isSMTP();
+                $mail->Host       = $_ENV['MAIL_HOST'];
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $_ENV['MAIL_USERNAME'];
+                $mail->Password   = $_ENV['MAIL_PASSWORD'];
+                $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
+                $mail->Port       = (int)$_ENV['MAIL_PORT'];
 
-            $headers = 'From: you@localhost' . "\r\n" . 
-                       'X-Mailer: PHP/' . phpversion();
+                //Recipients
+                $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
+                $mail->addAddress($_ENV['MAIL_TO_ADDRESS']);
 
-            $emailSent = mail($adminEmail, $subject, $message, $headers);
+                //Content
+                $mail->isHTML(false);
+                $mail->Subject = 'New form submission received';
+                $body = "A new visitor has submitted the form.\n\n";
+                foreach ($input as $key => $value) {
+                    $body .= ucfirst($key) . ': ' . $value . "\n";
+                }
+                $mail->Body = $body;
 
-            if (!$emailSent) {
-                error_log('Failed to send admin email');
+                $mail->send();
+            } catch (Exception $e) {
+                // Log email sending failure
+                error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
             }
 
             ob_clean(); // Clean output buffer just in case
-
             echo Response::with(Status::HTTP_OK, $translation->forKey('data_saved'));
+
         } else {
             echo Response::with(Status::HTTP_BAD_REQUEST, $translation->forKey('database_error'));
         }
