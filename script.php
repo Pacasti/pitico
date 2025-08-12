@@ -1,3 +1,5 @@
+<?php echo "Script is running!"; exit; ?>
+
 <?php
 
 declare(strict_types=1);
