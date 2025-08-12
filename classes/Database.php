@@ -6,16 +6,24 @@ namespace database;
 
 use PDO;
 
+// Load Composer's autoloader
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Load environment variables from .env file
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 class Database
 {
-    protected string $username = "root";
-    protected string $password = "";
-    protected string $dsn = 'mysql:host=localhost;dbname=customer_db';
     private PDO $db;
 
     public function __construct()
     {
-        $this->db = new PDO($this->dsn, $this->username, $this->password);
+        $dsn = 'mysql:host=' . $_ENV['DB_HOST'] . ';dbname=' . $_ENV['DB_NAME'];
+        $username = $_ENV['DB_USER'];
+        $password = $_ENV['DB_PASS'];
+
+        $this->db = new PDO($dsn, $username, $password);
     }
 
     /**
