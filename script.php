@@ -1,20 +1,20 @@
-<?php echo "Script is running!"; exit; ?>
-
 <?php
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/vendor/autoload.php';
+define('APP_ROOT', __DIR__);
+
+require_once APP_ROOT . '/vendor/autoload.php';
 
 // Load environment variables from .env file
-$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = \Dotenv\Dotenv::createImmutable(APP_ROOT);
 $dotenv->load();
 
-require_once './classes/Database.php';      #NOSONAR
-require_once './classes/Sanitizer.php';     #NOSONAR
-require_once './classes/Translation.php';   #NOSONAR
-require_once './classes/Response.php';      #NOSONAR
-require_once './classes/Status.php';        #NOSONAR
+require_once APP_ROOT . '/classes/Database.php';      #NOSONAR
+require_once APP_ROOT . '/classes/Sanitizer.php';     #NOSONAR
+require_once APP_ROOT . '/classes/Translation.php';   #NOSONAR
+require_once APP_ROOT . '/classes/Response.php';      #NOSONAR
+require_once APP_ROOT . '/classes/Status.php';        #NOSONAR
 
 use database\Database;
 use database\Response;
