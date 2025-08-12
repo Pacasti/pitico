@@ -1,5 +1,9 @@
 <?php
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 declare(strict_types=1);
 
 require_once './classes/Database.php';      #NOSONAR
@@ -13,6 +17,8 @@ use database\Response;
 use database\Sanitizer;
 use database\Status;
 use database\Translation;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 session_start();
 ob_start();
