@@ -21,9 +21,9 @@ class Database
     /**
      * @param array<string, string> $input
      *
-     * @return void
+     * @return bool
      */
-    public function save(array $input): void
+    public function save(array $input): bool
     {
         // Sanitize db input
         $sql = "INSERT INTO customer
@@ -40,14 +40,14 @@ class Database
             $statement->bindParam('first_name', $input['first_name']);
             $statement->bindParam('company', $input['company']);
             $statement->bindParam('message', $input['message']);
-            $statement->execute($input);
+            return $statement->execute();
         } catch (\Throwable $throwable) {
-            echo $throwable->getMessage();
-            exit;
+            error_log($throwable->getMessage());
+            return false;
         }
     }
 
-    public function exsists(string $email): bool
+    public function exists(string $email): bool
     {
         $sql = "SELECT * FROM customer WHERE email = :email";
 
@@ -59,6 +59,7 @@ class Database
             $result = $statement->fetchAll();
             return \count($result) > 0;
         } catch (\Throwable $throwable) {
+            error_log($throwable->getMessage());
             return false;
         }
 

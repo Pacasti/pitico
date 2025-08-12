@@ -80,33 +80,36 @@ try {
     $database = new Database();
     $email = trim($input['email']);
 
-    if ($database->exsists($email)) {
+    if ($database->exists($email)) {
         echo Response::with(Status::HTTP_BAD_REQUEST, sprintf($translation->forKey('email_already_exists'), $email));
     } else {
-        $database->save($input);
+        if ($database->save($input)) {
+            // Email setup
+            $adminEmail = 'admin@yourdomain.com';
+            $subject = 'New form submission received';
+            $message = "A new visitor has submitted the form.\n\n";
+            foreach ($input as $key => $value) {
+                $message .= ucfirst($key) . ': ' . $value . "\n";
+            }
 
-        // Email setup
-        $adminEmail = 'admin@yourdomain.com';
-        $subject = 'New form submission received';
-        $message = "A new visitor has submitted the form.\n\n";
-        foreach ($input as $key => $value) {
-            $message .= ucfirst($key) . ': ' . $value . "\n";
+            $headers = 'From: you@localhost' . "\r\n" . 
+                       'X-Mailer: PHP/' . phpversion();
+
+            $emailSent = mail($adminEmail, $subject, $message, $headers);
+
+            if (!$emailSent) {
+                error_log('Failed to send admin email');
+            }
+
+            ob_clean(); // Clean output buffer just in case
+
+            echo Response::with(Status::HTTP_OK, $translation->forKey('data_saved'));
+        } else {
+            echo Response::with(Status::HTTP_BAD_REQUEST, $translation->forKey('database_error'));
         }
-
-        $headers = 'From: you@localhost' . "\r\n" .
-                   'X-Mailer: PHP/' . phpversion();
-
-        $emailSent = mail($adminEmail, $subject, $message, $headers);
-
-        if (!$emailSent) {
-            error_log('Failed to send admin email');
-        }
-
-        ob_clean(); // Clean output buffer just in case
-
-        echo Response::with(Status::HTTP_OK, $translation->forKey('data_saved'));
     }
 } catch (Exception $e) {
-    echo Response::with(Status::HTTP_BAD_REQUEST, sprintf($translation->forKey('database_error'), $e->getMessage()));
+    error_log($e->getMessage());
+    echo Response::with(Status::HTTP_BAD_REQUEST, $translation->forKey('database_error'));
 }
 exit;
