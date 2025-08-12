@@ -19,4 +19,4 @@ jobs:
           server: w0186cee.kasserver.com
           username: w0186cee
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: w0186cee/hochautomatisiert.at/
+          server-dir: hochautomatisiert.at/
