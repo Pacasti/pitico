@@ -1,0 +1,22 @@
+name: FTP Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: w0186cee.kasserver.com
+          username: w0186cee
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: w0186cee/hochautomatisiert.at/
