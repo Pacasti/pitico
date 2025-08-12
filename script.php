@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Load environment variables from .env file
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 require_once './classes/Database.php';      #NOSONAR
 require_once './classes/Sanitizer.php';     #NOSONAR
 require_once './classes/Translation.php';   #NOSONAR
