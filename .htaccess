@@ -1,0 +1,18 @@
+Options -Indexes
+# Disable PHP errors from being displayed
+php_flag display_errors Off
+php_flag display_startup_errors Off
+
+# Log errors instead (optional, if allowed)
+php_flag log_errors On
+#php_value error_log /home/your_user/public_html/php-error.log
+
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1.html [L]
