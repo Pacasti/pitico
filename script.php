@@ -2,19 +2,11 @@
 
 declare(strict_types=1);
 
-define('APP_ROOT', __DIR__);
-
-require_once APP_ROOT . '/vendor/autoload.php';
-
-// Load environment variables from .env file
-$dotenv = \Dotenv\Dotenv::createImmutable(APP_ROOT);
-$dotenv->load();
-
-require_once APP_ROOT . '/classes/Database.php';      #NOSONAR
-require_once APP_ROOT . '/classes/Sanitizer.php';     #NOSONAR
-require_once APP_ROOT . '/classes/Translation.php';   #NOSONAR
-require_once APP_ROOT . '/classes/Response.php';      #NOSONAR
-require_once APP_ROOT . '/classes/Status.php';        #NOSONAR
+require_once './classes/Database.php';      #NOSONAR
+require_once './classes/Sanitizer.php';     #NOSONAR
+require_once './classes/Translation.php';   #NOSONAR
+require_once './classes/Response.php';      #NOSONAR
+require_once './classes/Status.php';        #NOSONAR
 
 use database\Database;
 use database\Response;
@@ -88,50 +80,33 @@ try {
     $database = new Database();
     $email = trim($input['email']);
 
-    if ($database->exists($email)) {
+    if ($database->exsists($email)) {
         echo Response::with(Status::HTTP_BAD_REQUEST, sprintf($translation->forKey('email_already_exists'), $email));
     } else {
-        if ($database->save($input)) {
-            //-- Send email notification
-            $mail = new PHPMailer(true);
-            try {
-                //Server settings
-                $mail->isSMTP();
-                $mail->Host       = $_ENV['MAIL_HOST'];
-                $mail->SMTPAuth   = true;
-                $mail->Username   = $_ENV['MAIL_USERNAME'];
-                $mail->Password   = $_ENV['MAIL_PASSWORD'];
-                $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
-                $mail->Port       = (int)$_ENV['MAIL_PORT'];
+        $database->save($input);
 
-                //Recipients
-                $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
-                $mail->addAddress($_ENV['MAIL_TO_ADDRESS']);
-
-                //Content
-                $mail->isHTML(false);
-                $mail->Subject = 'New form submission received';
-                $body = "A new visitor has submitted the form.\n\n";
-                foreach ($input as $key => $value) {
-                    $body .= ucfirst($key) . ': ' . $value . "\n";
-                }
-                $mail->Body = $body;
-
-                $mail->send();
-            } catch (Exception $e) {
-                // Log email sending failure
-                error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
-            }
-
-            ob_clean(); // Clean output buffer just in case
-            echo Response::with(Status::HTTP_OK, $translation->forKey('data_saved'));
-
-        } else {
-            echo Response::with(Status::HTTP_BAD_REQUEST, $translation->forKey('database_error'));
+        // Email setup
+        $adminEmail = 'admin@yourdomain.com';
+        $subject = 'New form submission received';
+        $message = "A new visitor has submitted the form.\n\n";
+        foreach ($input as $key => $value) {
+            $message .= ucfirst($key) . ': ' . $value . "\n";
         }
+
+        $headers = 'From: you@localhost' . "\r\n" .
+                   'X-Mailer: PHP/' . phpversion();
+
+        $emailSent = mail($adminEmail, $subject, $message, $headers);
+
+        if (!$emailSent) {
+            error_log('Failed to send admin email');
+        }
+
+        ob_clean(); // Clean output buffer just in case
+
+        echo Response::with(Status::HTTP_OK, $translation->forKey('data_saved'));
     }
 } catch (Exception $e) {
-    error_log($e->getMessage());
-    echo Response::with(Status::HTTP_BAD_REQUEST, $translation->forKey('database_error'));
+    echo Response::with(Status::HTTP_BAD_REQUEST, sprintf($translation->forKey('database_error'), $e->getMessage()));
 }
 exit;

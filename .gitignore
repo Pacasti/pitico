@@ -1,3 +1,19 @@
+# Gitignore for htdocs project
+
+# Composer dependencies
+/vendor/
+
+# IDE-specific files
 .idea/
+.DS_Store
+*.iml
+
+# Environment variables
 .env
-composer.phar
+.env.example
+
+# Log files
+*.log
+
+# Backup directory
+20250727/

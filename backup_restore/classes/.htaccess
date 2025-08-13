@@ -1,8 +1,0 @@
-# Deny all requests from Apache 2.4+.
-<IfModule mod_authz_core.c>
-     Require all denied
-</IfModule>
-
-# Deny from all
-RedirectMatch 403 ^/?$
-Options -Indexes

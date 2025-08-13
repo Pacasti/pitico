@@ -26,3 +26,4 @@ class Translation
         return "Translation not found";
     }
 }
+

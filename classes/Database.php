@@ -8,23 +8,22 @@ use PDO;
 
 class Database
 {
+    protected string $username = "root";
+    protected string $password = "";
+    protected string $dsn = 'mysql:host=localhost;dbname=customer_db';
     private PDO $db;
 
     public function __construct()
     {
-        $dsn = 'mysql:host=' . $_ENV['DB_HOST'] . ';dbname=' . $_ENV['DB_NAME'];
-        $username = $_ENV['DB_USER'];
-        $password = $_ENV['DB_PASS'];
-
-        $this->db = new PDO($dsn, $username, $password);
+        $this->db = new PDO($this->dsn, $this->username, $this->password);
     }
 
     /**
      * @param array<string, string> $input
      *
-     * @return bool
+     * @return void
      */
-    public function save(array $input): bool
+    public function save(array $input): void
     {
         // Sanitize db input
         $sql = "INSERT INTO customer
@@ -42,14 +41,13 @@ class Database
             $statement->bindParam('company', $input['company']);
             $statement->bindParam('message', $input['message']);
             $statement->execute($input);
-            return true;
         } catch (\Throwable $throwable) {
-            error_log($throwable->getMessage());
-            return false;
+            echo $throwable->getMessage();
+            exit;
         }
     }
 
-    public function exists(string $email): bool
+    public function exsists(string $email): bool
     {
         $sql = "SELECT * FROM customer WHERE email = :email";
 
